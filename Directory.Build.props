@@ -1,0 +1,10 @@
+<Project>
+  <!-- See https://aka.ms/dotnet/msbuild/customize for more details on customizing your build -->
+  <PropertyGroup>
+    <UseArtifactsOutput>true</UseArtifactsOutput>
+    <!-- Breaks build
+    <BaseOutputPath>$(MSBuildThisFileDirectory)\artifacts\bin\</BaseOutputPath>
+    <UseCommonOutputDirectory>true</UseCommonOutputDirectory>
+    -->
+  </PropertyGroup>
+</Project>
