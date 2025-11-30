@@ -2,7 +2,7 @@
 
 internal enum ExitCode
 {
-    InvalidPipeClientHandle = 1,
+    InvalidPipeName = 1,
     InvalidJson = 2,
     ErrorCreateJobObject = 3,
     ErrorCreateIoCompletionPort = 4,

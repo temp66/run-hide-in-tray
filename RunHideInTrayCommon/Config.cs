@@ -6,6 +6,8 @@ public class Config : IDisposable
 {
     public const int IconLargestSize = 256;
 
+    public required bool elevate;
+
     public required int HideOnStartTimeout;
 
     public required string Title;

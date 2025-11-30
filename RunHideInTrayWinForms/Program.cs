@@ -34,18 +34,27 @@ internal static class Program
         };
 
         if (args.Length != 1)
-            return (int)ExitCode.InvalidPipeClientHandle;
-        AnonymousPipeClientStream pipeClientStream;
+            return (int)ExitCode.InvalidPipeName;
+        NamedPipeClientStream pipeClientStream;
         try
         {
-            pipeClientStream = new(args[0]);
+            pipeClientStream = new(".", args[0], PipeDirection.In);
         }
-        catch (IOException)
+        catch (ArgumentException)
         {
-            return (int)ExitCode.InvalidPipeClientHandle;
+            return (int)ExitCode.InvalidPipeName;
         }
         using (pipeClientStream)
         {
+            try
+            {
+                pipeClientStream.Connect(1000);
+            }
+            catch (SystemException)
+            {
+                return (int)ExitCode.InvalidPipeName;
+            }
+
             Config config;
             try
             {

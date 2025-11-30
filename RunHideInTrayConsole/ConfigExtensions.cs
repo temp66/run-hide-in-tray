@@ -10,7 +10,7 @@ internal static class ConfigExtensions
 {
     extension(Config)
     {
-        public static Config Create(int hideOnStartTimeout, string? title, FileInfo? iconFileInfo, string[] exec)
+        public static Config Create(bool elevate, int hideOnStartTimeout, string? title, FileInfo? iconFileInfo, string[] exec)
         {
             string exec_ = CommandLineQuoting.Quoted(exec);
             title ??= $"{ApplicationInfo.Name} - {exec_}";
@@ -42,6 +42,7 @@ internal static class ConfigExtensions
                 icon ??= SystemIcons.GetStockIcon(StockIconId.Application);
                 return new()
                 {
+                    elevate = elevate,
                     HideOnStartTimeout = hideOnStartTimeout,
                     Title = title,
                     Icon = icon,
