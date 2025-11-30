@@ -4,6 +4,6 @@ public static class ApplicationInfo
 {
     public const string Name = "RunHideInTray";
     public const string WinFormsExePath = """
-        ..\..\RunHideInTrayWinForms\Debug\RunHideInTrayWinForms
+        ..\..\RunHideInTrayWinForms\debug\RunHideInTrayWinForms
         """;
 }
