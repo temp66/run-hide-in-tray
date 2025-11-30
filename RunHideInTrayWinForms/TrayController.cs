@@ -1,15 +1,19 @@
-﻿using RunHideInTray.Diagnostics;
-using String;
-using Windows;
+﻿extern alias RunHideInTrayCommon;
 
-using Microsoft.Win32;
-using System.ComponentModel;
-using System.Diagnostics;
+using RunHideInTrayCommon::RunHideInTrayCommon;
+using RunHideInTrayCommon::String;
+using RunHideInTrayCommon::Windows;
+using RunHideInTrayWinForms.Diagnostics;
+
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.UI.WindowsAndMessaging;
 
-namespace RunHideInTray;
+using Microsoft.Win32;
+using System.ComponentModel;
+using System.Diagnostics;
+
+namespace RunHideInTrayWinForms;
 
 internal class TrayController : IDisposable
 {
@@ -126,7 +130,7 @@ internal class TrayController : IDisposable
             Failed to close main window: The process does not have a main window or the main window is disabled (for example if a modal dialog is being shown).
             Try killing the process?
             """,
-            nameof(RunHideInTray),
+            ApplicationInfo.Name,
             MessageBoxButtons.YesNo,
             MessageBoxIcon.Warning
         );

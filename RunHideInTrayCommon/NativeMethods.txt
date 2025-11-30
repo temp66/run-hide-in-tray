@@ -1,25 +1,18 @@
-﻿AllocConsole
-AssignProcessToJobObject
-AttachConsole
-ATTACH_PARENT_PROCESS
+﻿AssignProcessToJobObject
 CreateIoCompletionPort
 CreateJobObject
 CreateProcess
-FreeConsole
+GetExitCodeProcess
 GetQueuedCompletionStatus
 INFINITE
 INVALID_HANDLE_VALUE
-IsIconic
 IsProcessInJob
 JOB_OBJECT_MSG_ACTIVE_PROCESS_ZERO
 JOBOBJECT_ASSOCIATE_COMPLETION_PORT
 JOBOBJECT_BASIC_PROCESS_ID_LIST
 // JOBOBJECT_EXTENDED_LIMIT_INFORMATION
-OpenIcon
 QueryInformationJobObject
 ResumeThread
-SetForegroundWindow
 SetInformationJobObject
-ShowWindow
 TerminateJobObject
 WIN32_ERROR

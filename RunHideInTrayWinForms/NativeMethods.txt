@@ -1,0 +1,4 @@
+﻿IsIconic
+OpenIcon
+SetForegroundWindow
+ShowWindow

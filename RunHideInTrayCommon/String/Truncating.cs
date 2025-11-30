@@ -2,7 +2,7 @@
 
 namespace String;
 
-internal static class Truncating
+public static class Truncating
 {
     public static string Ellipsis(string s, int maxLength)
     {

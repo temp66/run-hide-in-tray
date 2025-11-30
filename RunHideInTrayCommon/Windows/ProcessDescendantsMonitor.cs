@@ -1,122 +1,108 @@
 ﻿using InteropServices;
 
-using Microsoft.Win32.SafeHandles;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.System.JobObjects;
 using Windows.Win32.System.Threading;
 
+using Microsoft.Win32.SafeHandles;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
 namespace Windows;
 
-internal class ProcessDescendantsMonitor : IDisposable
+public class ProcessDescendantsMonitor : IDisposable
 {
     SafeFileHandle _jobObject;
     nuint _completionKey;
     SafeFileHandle _completionPort;
+    SafeProcessHandle _rootProcess;
 
     public event EventHandler? AllExited;
     public event EventHandler<Win32Exception>? Faulted;
-    ISynchronizeInvoke _synchronizingObject;
 
     bool _disposed = false;
 
-    public ProcessDescendantsMonitor(string exec, ISynchronizeInvoke synchronizingObject)
+    public ProcessDescendantsMonitor(string exec)
     {
-        _jobObject = PInvoke.CreateJobObject(null, null);
-        if (_jobObject.IsInvalid)
+        try
         {
-            Dispose();
-            throw Win32Error.CreateExceptionFromLastError(nameof(PInvoke.CreateJobObject));
-        }
+            _jobObject = PInvoke.CreateJobObject(null, null);
+            if (_jobObject.IsInvalid)
+                throw Win32Error.CreateExceptionFromLastError(nameof(PInvoke.CreateJobObject));
 
-        _completionKey = (nuint)_jobObject.DangerousGetHandle();
+            _completionKey = (nuint)_jobObject.DangerousGetHandle();
 
-        using SafeFileHandle invalidHandle = new(HANDLE.INVALID_HANDLE_VALUE, true);
-        _completionPort = PInvoke.CreateIoCompletionPort(invalidHandle, null, _completionKey, 1);
-        if (_completionPort.IsInvalid)
-        {
-            Dispose();
-            throw Win32Error.CreateExceptionFromLastError(nameof(PInvoke.CreateIoCompletionPort));
-        }
+            using SafeFileHandle invalidHandle = new(HANDLE.INVALID_HANDLE_VALUE, true);
+            _completionPort = PInvoke.CreateIoCompletionPort(invalidHandle, null, _completionKey, 1);
+            if (_completionPort.IsInvalid)
+                throw Win32Error.CreateExceptionFromLastError(nameof(PInvoke.CreateIoCompletionPort));
 
-        JOBOBJECT_ASSOCIATE_COMPLETION_PORT jobObjectAssociateCompletionPort;
-        unsafe
-        {
-            jobObjectAssociateCompletionPort = new()
+            JOBOBJECT_ASSOCIATE_COMPLETION_PORT jobObjectAssociateCompletionPort;
+            unsafe
             {
-                CompletionKey = (void*)_completionKey,
-                CompletionPort = (HANDLE)_completionPort.DangerousGetHandle(),
+                jobObjectAssociateCompletionPort = new()
+                {
+                    CompletionKey = (void*)_completionKey,
+                    CompletionPort = (HANDLE)_completionPort.DangerousGetHandle(),
+                };
+            }
+            if (!PInvoke.SetInformationJobObject(
+                _jobObject,
+                JOBOBJECTINFOCLASS.JobObjectAssociateCompletionPortInformation,
+                Cast.AsBytes(ref jobObjectAssociateCompletionPort)
+            ))
+                throw Win32Error.CreateExceptionFromLastError(nameof(PInvoke.SetInformationJobObject));
+
+            // JOBOBJECT_EXTENDED_LIMIT_INFORMATION jobObjectExtendedLimitInformation = new()
+            // {
+            //     BasicLimitInformation = new()
+            //     {
+            //         LimitFlags = JOB_OBJECT_LIMIT.JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE,
+            //     },
+            // };
+            // if (!PInvoke.SetInformationJobObject(
+            //     _jobObject,
+            //     JOBOBJECTINFOCLASS.JobObjectExtendedLimitInformation,
+            //     Cast.AsBytes(ref jobObjectExtendedLimitInformation)
+            // ))
+            //     throw Win32Error.CreateExceptionFromLastError(nameof(PInvoke.SetInformationJobObject));
+
+            Span<char> execSpan = $"{exec}\0".ToCharArray();
+            STARTUPINFOW startupInfo = new()
+            {
+                cb = (uint)Marshal.SizeOf<STARTUPINFOW>(),
             };
+            PROCESS_INFORMATION processInformation;
+            bool createProcessResult;
+            unsafe
+            {
+                createProcessResult = PInvoke.CreateProcess(
+                    null, ref execSpan,
+                    null, null, false,
+                    PROCESS_CREATION_FLAGS.CREATE_SUSPENDED,
+                    null, null,
+                    startupInfo, out processInformation
+                );
+            }
+            if (!createProcessResult)
+                throw Win32Error.CreateExceptionFromLastError(nameof(PInvoke.CreateProcess));
+            _rootProcess = new(processInformation.hProcess, true);
+            using SafeFileHandle thread = new(processInformation.hThread, true);
+
+            if (!PInvoke.AssignProcessToJobObject(_jobObject, _rootProcess))
+                throw Win32Error.CreateExceptionFromLastError(nameof(PInvoke.AssignProcessToJobObject));
+
+            if (PInvoke.ResumeThread(thread) == uint.MaxValue)
+                throw Win32Error.CreateExceptionFromLastError(nameof(PInvoke.ResumeThread));
         }
-        if (!PInvoke.SetInformationJobObject(
-            _jobObject,
-            JOBOBJECTINFOCLASS.JobObjectAssociateCompletionPortInformation,
-            Cast.AsBytes(ref jobObjectAssociateCompletionPort)
-        ))
+        catch
         {
             Dispose();
-            throw Win32Error.CreateExceptionFromLastError(nameof(PInvoke.SetInformationJobObject));
+            throw;
         }
-
-        // JOBOBJECT_EXTENDED_LIMIT_INFORMATION jobObjectExtendedLimitInformation = new()
-        // {
-        //     BasicLimitInformation = new()
-        //     {
-        //         LimitFlags = JOB_OBJECT_LIMIT.JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE,
-        //     },
-        // };
-        // if (!PInvoke.SetInformationJobObject(
-        //     _jobObject,
-        //     JOBOBJECTINFOCLASS.JobObjectExtendedLimitInformation,
-        //     Cast.AsBytes(ref jobObjectExtendedLimitInformation)
-        // ))
-        // {
-        //     Dispose();
-        //     throw Win32Error.CreateExceptionFromLastError(nameof(PInvoke.SetInformationJobObject));
-        // }
-
-        Span<char> execSpan = $"{exec}\0".ToCharArray();
-        STARTUPINFOW startupInfo = new()
-        {
-            cb = (uint)Marshal.SizeOf<STARTUPINFOW>(),
-        };
-        PROCESS_INFORMATION processInformation;
-        bool createProcessResult;
-        unsafe
-        {
-            createProcessResult = PInvoke.CreateProcess(
-                null, ref execSpan,
-                null, null, false,
-                PROCESS_CREATION_FLAGS.CREATE_SUSPENDED,
-                null, null,
-                startupInfo, out processInformation
-            );
-        }
-        if (!createProcessResult)
-        {
-            Dispose();
-            throw Win32Error.CreateExceptionFromLastError(nameof(PInvoke.CreateProcess));
-        }
-        using SafeProcessHandle process = new(processInformation.hProcess, true);
-        using SafeFileHandle thread = new(processInformation.hThread, true);
-
-        if (!PInvoke.AssignProcessToJobObject(_jobObject, process))
-        {
-            Dispose();
-            throw Win32Error.CreateExceptionFromLastError(nameof(PInvoke.AssignProcessToJobObject));
-        }
-
-        if (PInvoke.ResumeThread(thread) == uint.MaxValue)
-        {
-            Dispose();
-            throw Win32Error.CreateExceptionFromLastError(nameof(PInvoke.ResumeThread));
-        }
-
-        _synchronizingObject = synchronizingObject;
     }
 
     public void Dispose()
@@ -131,20 +117,21 @@ internal class ProcessDescendantsMonitor : IDisposable
             return;
         if (disposing)
         {
+            _rootProcess?.Dispose();
             _completionPort?.Dispose();
-            _jobObject.Dispose();
+            _jobObject?.Dispose();
         }
         _disposed = true;
     }
 
-    public Task WaitForAllProcessesAsync()
+    public Task WaitForAllProcessesAsync(ISynchronizeInvoke sychronizingObject)
     {
-        return Task.Run(WaitForAllProcesses);
+        return Task.Run(() => WaitForAllProcesses(sychronizingObject));
     }
 
     // https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-jobobject_associate_completion_port#remarks
     // Caveat: Notifications are not guaranteed.
-    void WaitForAllProcesses()
+    void WaitForAllProcesses(ISynchronizeInvoke synchronizingObject)
     {
         while (true)
         {
@@ -164,7 +151,7 @@ internal class ProcessDescendantsMonitor : IDisposable
             if (!getQueuedCompletionStatusResult)
             {
                 if (Faulted is not null)
-                    _synchronizingObject.BeginInvoke(Faulted, [
+                    _ = synchronizingObject.BeginInvoke(Faulted, [
                         this,
                         Win32Error.CreateExceptionFromLastError(nameof(PInvoke.GetQueuedCompletionStatus))
                     ]);
@@ -174,7 +161,7 @@ internal class ProcessDescendantsMonitor : IDisposable
             if (messageIdentifier == PInvoke.JOB_OBJECT_MSG_ACTIVE_PROCESS_ZERO && completionKey == _completionKey)
             {
                 if (AllExited is not null)
-                    _synchronizingObject.BeginInvoke(AllExited, [this, EventArgs.Empty]);
+                    _ = synchronizingObject.BeginInvoke(AllExited, [this, EventArgs.Empty]);
                 break;
             }
         }
@@ -217,10 +204,10 @@ internal class ProcessDescendantsMonitor : IDisposable
         }
         uint n = jobObjectBasicProcessIdList.NumberOfProcessIdsInList;
         Debug.Assert(n == jobObjectBasicProcessIdList.NumberOfAssignedProcesses);
-        
+
         // In case `WaitForAllProcesses` is not notified
         if (n == 0)
-            Application.Exit();
+            AllExited?.Invoke(this, EventArgs.Empty);
 
         nuint[] processIdList = jobObjectBasicProcessIdList.ProcessIdList.AsSpan((int)n).ToArray();
 
@@ -229,7 +216,7 @@ internal class ProcessDescendantsMonitor : IDisposable
             Process process;
             try
             {
-                process = Process.GetProcessById((int)processId);
+                process = System.Diagnostics.Process.GetProcessById((int)processId);
             }
             catch (ArgumentException)
             {
@@ -260,5 +247,12 @@ internal class ProcessDescendantsMonitor : IDisposable
 
         if (!PInvoke.TerminateJobObject(_jobObject, 1))
             throw Win32Error.CreateExceptionFromLastError(nameof(PInvoke.TerminateJobObject));
+    }
+
+    public int GetRootProcessExitCode()
+    {
+        if (!PInvoke.GetExitCodeProcess(_rootProcess, out uint exitCode))
+            throw Win32Error.CreateExceptionFromLastError(nameof(PInvoke.GetExitCodeProcess));
+        return (int)exitCode;
     }
 }

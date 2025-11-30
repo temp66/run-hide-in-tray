@@ -2,7 +2,7 @@
 
 namespace InteropServices;
 
-internal class MemoryManager : SafeHandleAlwaysValid
+public class MemoryManager : SafeHandleAlwaysValid
 {
     public unsafe void* Ptr { get; private set; }
 

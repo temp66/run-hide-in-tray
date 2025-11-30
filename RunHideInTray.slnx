@@ -1,4 +1,6 @@
 <Solution>
-  <Project Path="RunHideInTray/RunHideInTray.csproj" />
-  <Project Path="RunHideInTrayTests/RunHideInTrayTests.csproj" />
+  <Project Path="RunHideInTrayCommon/RunHideInTrayCommon.csproj" Id="e0c1df4c-51ac-404d-b405-23c9d8c00d40" />
+  <Project Path="RunHideInTrayConsole/RunHideInTrayConsole.csproj" Id="742fab47-b593-4eb0-9cc2-fc523ef7139a" />
+  <Project Path="RunHideInTrayTests/RunHideInTrayTests.csproj" Id="82e103d0-04e5-4232-8c3d-70c7fc45e62f" />
+  <Project Path="RunHideInTrayWinForms/RunHideInTrayWinForms.csproj" Id="ddb4f751-33df-4e21-8893-9d4b20c10740" />
 </Solution>

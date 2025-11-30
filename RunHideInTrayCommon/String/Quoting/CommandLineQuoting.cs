@@ -4,7 +4,7 @@ using System.Text;
 
 namespace String.Quoting;
 
-internal static partial class CommandLineQuoting
+public static partial class CommandLineQuoting
 {
     public static string QuotedArgument(string arg)
     {

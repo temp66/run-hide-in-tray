@@ -1,6 +1,6 @@
 ﻿namespace String.Quoting;
 
-internal static partial class CommandLineQuoting
+public static partial class CommandLineQuoting
 {
     public static string Quoted(IEnumerable<string> args)
     {
