@@ -123,7 +123,7 @@ internal static class Program
 
             using TrayController trayController = new(config, processDescendantsMonitor);
             Application.Run();
-            return (int)exitCode!;
+            return exitCode!.Value;
         }
     }
 }
