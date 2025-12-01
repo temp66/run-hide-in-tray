@@ -1,5 +1,4 @@
 ﻿using RunHideInTrayCommon;
-using RunHideInTrayCommon.Json;
 using RunHideInTrayConsole;
 using RunHideInTrayConsole.Diagnostics;
 

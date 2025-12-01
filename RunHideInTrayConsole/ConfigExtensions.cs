@@ -1,4 +1,5 @@
-﻿using RunHideInTrayCommon;
+﻿using IconExtensions;
+using RunHideInTrayCommon;
 using RunHideInTrayConsole.Diagnostics;
 using String.Quoting;
 
@@ -32,7 +33,7 @@ internal static class ConfigExtensions
                 else
                     try
                     {
-                        icon = new(iconFileStream, Config.IconLargestSize, Config.IconLargestSize);
+                        icon = new(iconFileStream, Icon.LargestSize);
                     }
                     catch (ArgumentException ex)
                     {

@@ -1,6 +1,8 @@
-﻿using System.Text.Json.Serialization;
+﻿using IconExtensions;
 
-namespace RunHideInTrayCommon.Json;
+using System.Text.Json.Serialization;
+
+namespace RunHideInTrayCommon;
 
 [JsonSourceGenerationOptions(IncludeFields = true, Converters = [typeof(IconJsonConverter)])]
 [JsonSerializable(typeof(Config))]
