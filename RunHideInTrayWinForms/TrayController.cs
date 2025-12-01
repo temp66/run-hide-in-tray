@@ -94,33 +94,26 @@ internal class TrayController : IDisposable
         ShowWindows();
 
         bool closedAny = false;
-        IEnumerable<Process> processList = _processDescendantsMonitor.GetProcessList();
-        using var processEnumerator = processList.GetEnumerator();
-        while (true)
+        try
         {
-            bool result;
-            try
+            _processDescendantsMonitor.EnumerateProcesses((process) =>
             {
-                result = processEnumerator.MoveNext();
-            }
-            catch (Win32Exception ex)
-            {
-                ExceptionReporter.ShowMessageBox(ex);
-                return;
-            }
-            if (!result)
-                break;
-            using Process process = processEnumerator.Current;
-
-            try
-            {
-                result = process.CloseMainWindow();
-            }
-            catch (InvalidOperationException)
-            {
-                continue;
-            }
-            closedAny |= result;
+                bool result;
+                try
+                {
+                    result = process.CloseMainWindow();
+                }
+                catch (InvalidOperationException)
+                {
+                    return;
+                }
+                closedAny |= result;
+            });
+        }
+        catch (Win32Exception ex)
+        {
+            ExceptionReporter.ShowMessageBox(ex);
+            return;
         }
         if (closedAny)
             return;
@@ -158,57 +151,60 @@ internal class TrayController : IDisposable
     void HideWindows(int waitTimeout = 0)
     {
         Stopwatch stopwatch = Stopwatch.StartNew();
-
-        IEnumerable<Process> processList = _processDescendantsMonitor.GetProcessList();
-        using var processEnumerator = processList.GetEnumerator();
-        while (true)
+        do
         {
-            bool result;
             try
             {
-                result = processEnumerator.MoveNext();
+                _processDescendantsMonitor.EnumerateProcesses((process) =>
+                {
+                    try
+                    {
+                        process.WaitForInputIdle((int)long.Max(waitTimeout - stopwatch.ElapsedMilliseconds, 0));
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        // In the case of consoles, `Process.MainWindowHandle` may still be valid.
+                        // https://stackoverflow.com/questions/65528642/callback-for-console-window-closing-of-other-process-assuming-the-hwnd-of-the#comment115854186_65528642
+                        // https://github.com/microsoft/terminal/issues/11823#issuecomment-979185489
+                        // return;
+                    }
+                    HWND mainWindowHandle;
+                    try
+                    {
+                        mainWindowHandle = (HWND)process.MainWindowHandle;
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        return;
+                    }
+                    if (mainWindowHandle == HWND.Null)
+                        return;
+
+                    PInvoke.ShowWindow(mainWindowHandle, SHOW_WINDOW_CMD.SW_HIDE);
+                    // When invoked by a GUI event, here the foreground window likely belongs to explorer.
+                    // When invoked during startup, here the foreground window likely belongs to `process`.
+                    // It is not easy to return to previous foreground window.
+                    // https://stackoverflow.com/questions/621998/restoring-window-focus-back-to-previous-owner
+                    // https://stackoverflow.com/questions/1041532/prevent-system-tray-icon-from-stealing-focus-when-clicked
+                    // https://stackoverflow.com/questions/13659970/how-to-focus-on-last-activated-program/13660585#13660585
+                    // https://stackoverflow.com/questions/55484749/how-to-prevent-the-current-window-from-losing-focus-when-clicking-a-system-tray
+                    // https://learn.microsoft.com/en-us/answers/questions/966217/how-to-get-the-hwnd-of-the-next-window-that-will-b
+                    // This requires the message loop to have already started. Use `keybd_event` instead.
+                    // SendKeys.Send("%{ESC}");
+                    _hiddenWindowHandleList.Add(mainWindowHandle);
+                });
             }
             catch (Win32Exception ex)
             {
                 ExceptionReporter.ShowMessageBox(ex);
                 return;
             }
-            if (!result)
+
+            if (_showMenuItem.Enabled)
                 break;
-            using Process process = processEnumerator.Current;
-
-            try
-            {
-                process.WaitForInputIdle((int)long.Max(waitTimeout - stopwatch.ElapsedMilliseconds, 0));
-            }
-            catch (InvalidOperationException)
-            {
-            }
-            HWND mainWindowHandle;
-            try
-            {
-                mainWindowHandle = (HWND)process.MainWindowHandle;
-            }
-            catch (InvalidOperationException)
-            {
-                continue;
-            }
-            if (mainWindowHandle == 0)
-                continue;
-
-            PInvoke.ShowWindow(mainWindowHandle, SHOW_WINDOW_CMD.SW_HIDE);
-            // When invoked by a GUI event, here the foreground window likely belongs to explorer.
-            // When invoked during startup, here the foreground window likely belongs to `process`.
-            // It is not easy to return to previous foreground window.
-            // https://stackoverflow.com/questions/621998/restoring-window-focus-back-to-previous-owner
-            // https://stackoverflow.com/questions/1041532/prevent-system-tray-icon-from-stealing-focus-when-clicked
-            // https://stackoverflow.com/questions/13659970/how-to-focus-on-last-activated-program/13660585#13660585
-            // https://stackoverflow.com/questions/55484749/how-to-prevent-the-current-window-from-losing-focus-when-clicking-a-system-tray
-            // https://learn.microsoft.com/en-us/answers/questions/966217/how-to-get-the-hwnd-of-the-next-window-that-will-b
-            // This requires the message loop to have already started. Use `keybd_event` instead.
-            // SendKeys.Send("%{ESC}");
-            _hiddenWindowHandleList.Add(mainWindowHandle);
+            Thread.Sleep(10);
         }
+        while (stopwatch.ElapsedMilliseconds < waitTimeout);
     }
 
     void ShowWindows()

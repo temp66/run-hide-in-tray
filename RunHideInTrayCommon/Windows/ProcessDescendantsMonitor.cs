@@ -167,7 +167,7 @@ public class ProcessDescendantsMonitor : IDisposable
         }
     }
 
-    public IEnumerable<Process> GetProcessList()
+    public void EnumerateProcesses(Action<Process> callback)
     {
         using MemoryManager memoryManager = new((nuint)JOBOBJECT_BASIC_PROCESS_ID_LIST.SizeOf(1));
         ref var jobObjectBasicProcessIdList = ref Unsafe.NullRef<JOBOBJECT_BASIC_PROCESS_ID_LIST>();
@@ -216,13 +216,13 @@ public class ProcessDescendantsMonitor : IDisposable
             Process process;
             try
             {
-                process = System.Diagnostics.Process.GetProcessById((int)processId);
+                process = Process.GetProcessById((int)processId);
             }
             catch (ArgumentException)
             {
                 continue;
             }
-            try
+            using (process)
             {
                 // In case the process has exited and `processId` is recycled in this gap
                 // Process ID cannot be recycled if there is a handle open to the process.
@@ -230,13 +230,9 @@ public class ProcessDescendantsMonitor : IDisposable
                     throw Win32Error.CreateExceptionFromLastError(nameof(PInvoke.IsProcessInJob));
                 if (!isProcessInJob)
                     continue;
+
+                callback(process);
             }
-            catch
-            {
-                process.Dispose();
-                throw;
-            }
-            yield return process;
         }
     }
 
