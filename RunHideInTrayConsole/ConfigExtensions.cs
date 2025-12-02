@@ -1,9 +1,6 @@
-﻿using IconExtensions;
-using RunHideInTrayCommon;
+﻿using RunHideInTrayCommon;
 using RunHideInTrayConsole.Diagnostics;
 using String.Quoting;
-
-using System.Drawing;
 
 namespace RunHideInTrayConsole;
 
@@ -14,7 +11,9 @@ internal static class ConfigExtensions
         public static Config Create(bool elevate, int hideOnStartTimeout, string? title, FileInfo? iconFileInfo, string[] exec)
         {
             string exec_ = CommandLineQuoting.Quoted(exec);
+
             title ??= $"{ApplicationInfo.Name} - {exec_}";
+
             FileStream? iconFileStream;
             try
             {
@@ -33,14 +32,26 @@ internal static class ConfigExtensions
                 else
                     try
                     {
-                        icon = new(iconFileStream, Icon.LargestSize);
+                        icon = new(iconFileStream, SystemInformation.SmallIconSize);
                     }
                     catch (ArgumentException ex)
                     {
                         ExceptionReporter.ToConsole("Failed to load icon from file", ex);
                         icon = null;
                     }
-                icon ??= SystemIcons.GetStockIcon(StockIconId.Application);
+
+                if (icon is null)
+                {
+                    try
+                    {
+                        icon = Icon.ExtractIcon(exec[0], 0, true);
+                    }
+                    catch (IOException)
+                    {
+                    }
+                    icon ??= SystemIcons.GetStockIcon(StockIconId.Application, StockIconOptions.SmallIcon);
+                }
+
                 return new()
                 {
                     elevate = elevate,
