@@ -4,7 +4,7 @@ namespace RunHideInTrayCommon;
 
 public class Config : IDisposable
 {
-    public required bool elevate;
+    public required bool Elevate;
 
     public required int HideOnStartTimeout;
 

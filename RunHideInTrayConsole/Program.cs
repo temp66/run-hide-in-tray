@@ -86,7 +86,7 @@ internal class Program
         {
             UseShellExecute = true,
         };
-        if (config.elevate)
+        if (config.Elevate)
             processStartInfo.Verb = "runas";
         Process? process;
         try

@@ -54,7 +54,7 @@ internal static class ConfigExtensions
 
                 return new()
                 {
-                    elevate = elevate,
+                    Elevate = elevate,
                     HideOnStartTimeout = hideOnStartTimeout,
                     Title = title,
                     Icon = icon,
