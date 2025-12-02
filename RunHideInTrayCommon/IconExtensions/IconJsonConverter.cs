@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace IconExtensions;
 
-public class IconJsonConverter : JsonConverter<Icon>
+internal class IconJsonConverter : JsonConverter<Icon>
 {
     public override void Write(Utf8JsonWriter writer, Icon value, JsonSerializerOptions options)
     {
