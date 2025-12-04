@@ -2,6 +2,7 @@
 CreateIoCompletionPort
 CreateJobObject
 CreateProcess
+DestroyIcon
 GetExitCodeProcess
 GetQueuedCompletionStatus
 INFINITE
