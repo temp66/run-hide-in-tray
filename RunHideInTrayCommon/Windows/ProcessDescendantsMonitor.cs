@@ -18,7 +18,7 @@ public class ProcessDescendantsMonitor : IDisposable
     SafeFileHandle _jobObject;
     nuint _completionKey;
     SafeFileHandle _completionPort;
-    SafeProcessHandle _rootProcess;
+    SafeProcessHandle _rootProcessHandle;
 
     public event EventHandler? AllExited;
     public event EventHandler<Win32Exception>? Faulted;
@@ -89,10 +89,10 @@ public class ProcessDescendantsMonitor : IDisposable
             }
             if (!createProcessResult)
                 throw Win32Error.CreateExceptionFromLastError(nameof(PInvoke.CreateProcess));
-            _rootProcess = new(processInformation.hProcess, true);
+            _rootProcessHandle = new(processInformation.hProcess, true);
             using SafeFileHandle thread = new(processInformation.hThread, true);
 
-            if (!PInvoke.AssignProcessToJobObject(_jobObject, _rootProcess))
+            if (!PInvoke.AssignProcessToJobObject(_jobObject, _rootProcessHandle))
                 throw Win32Error.CreateExceptionFromLastError(nameof(PInvoke.AssignProcessToJobObject));
 
             if (PInvoke.ResumeThread(thread) == uint.MaxValue)
@@ -117,7 +117,7 @@ public class ProcessDescendantsMonitor : IDisposable
             return;
         if (disposing)
         {
-            _rootProcess?.Dispose();
+            _rootProcessHandle?.Dispose();
             _completionPort?.Dispose();
             _jobObject?.Dispose();
         }
@@ -247,7 +247,7 @@ public class ProcessDescendantsMonitor : IDisposable
 
     public int GetRootProcessExitCode()
     {
-        if (!PInvoke.GetExitCodeProcess(_rootProcess, out uint exitCode))
+        if (!PInvoke.GetExitCodeProcess(_rootProcessHandle, out uint exitCode))
             throw Win32Error.CreateExceptionFromLastError(nameof(PInvoke.GetExitCodeProcess));
         return (int)exitCode;
     }
