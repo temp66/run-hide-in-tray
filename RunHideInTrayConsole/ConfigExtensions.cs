@@ -14,6 +14,7 @@ internal static class ConfigExtensions
 
             title ??= $"{ApplicationInfo.Name} - {exec_}";
 
+            Size iconSize = SystemInformation.SmallIconSize;
             FileStream? iconFileStream;
             try
             {
@@ -32,7 +33,7 @@ internal static class ConfigExtensions
                 else
                     try
                     {
-                        icon = new(iconFileStream, SystemInformation.SmallIconSize);
+                        icon = new(iconFileStream, iconSize);
                     }
                     catch (ArgumentException ex)
                     {
@@ -44,12 +45,12 @@ internal static class ConfigExtensions
                 {
                     try
                     {
-                        icon = Icon.ExtractIcon(exec[0], 0, true);
+                        icon = Icon.ExtractIcon(exec[0], 0, iconSize.Width);
                     }
                     catch (IOException)
                     {
                     }
-                    icon ??= SystemIcons.GetStockIcon(StockIconId.Application, StockIconOptions.SmallIcon);
+                    icon ??= SystemIcons.GetStockIcon(StockIconId.Application, iconSize.Width);
                 }
 
                 return new()

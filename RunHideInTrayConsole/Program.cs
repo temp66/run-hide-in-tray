@@ -15,6 +15,8 @@ internal class Program
     [STAThread]
     static int Main(string[] args)
     {
+        ApplicationConfiguration.Initialize();
+
         Option<bool> elevateOption = new("--elevate")
         {
             Description = $"""
