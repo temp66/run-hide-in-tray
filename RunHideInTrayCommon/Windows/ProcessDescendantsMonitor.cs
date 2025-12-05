@@ -81,7 +81,7 @@ public class ProcessDescendantsMonitor : IDisposable
             {
                 createProcessResult = PInvoke.CreateProcess(
                     null, ref execSpan,
-                    null, null, false,
+                    null, null, true,
                     PROCESS_CREATION_FLAGS.CREATE_SUSPENDED,
                     null, null,
                     startupInfo, out processInformation
