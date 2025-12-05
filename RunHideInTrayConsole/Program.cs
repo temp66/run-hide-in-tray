@@ -84,7 +84,7 @@ internal class Program
     {
         string pipeName = Guid.NewGuid().ToString();
         using NamedPipeServerStream pipeServerStream = new(pipeName, PipeDirection.Out);
-        ProcessStartInfo processStartInfo = new(ApplicationInfo.WinFormsExePath, pipeName)
+        ProcessStartInfo processStartInfo = new(Path.GetFullPath(ApplicationInfo.WinFormsExeRelativePath, AppContext.BaseDirectory), pipeName)
         {
             UseShellExecute = true,
         };
