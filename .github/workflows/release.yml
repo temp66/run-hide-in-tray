@@ -63,13 +63,15 @@ jobs:
         dotnet publish RunHideInTrayWinForms --output artifacts\publish\release ${{ matrix.self-contained.option }} --property:PublishReadyToRun=true --runtime ${{ matrix.RID }}
 
     - name: Zip artifacts
-      run: Compress-Archive artifacts\publish\release -DestinationPath artifacts\release.zip
+      run: |
+        cd artifacts
+        Compress-Archive publish\release -DestinationPath RunHideInTray_${{ matrix.self-contained.pivot }}_${{ matrix.RID }}.zip
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v5.0.0
       with:
         name: RunHideInTray_${{ matrix.self-contained.pivot }}_${{ matrix.RID }}
-        path: artifacts\publish\release
+        path: artifacts\RunHideInTray_${{ matrix.self-contained.pivot }}_${{ matrix.RID }}.zip
   
   release:
 
@@ -83,8 +85,12 @@ jobs:
     steps:
     - name: Download artifacts
       uses: actions/download-artifact@v6.0.0
+      with:
+        merge-multiple: true
 
     - name: Create Github Release
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         gh release create --draft ${{ github.ref_name }} --notes-from-tag \
         "RunHideInTray_self-contained_win-x64.zip#RunHideInTray self-contained x64" \
