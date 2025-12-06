@@ -97,7 +97,7 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        gh release create --draft ${{ github.ref_name }} --notes-from-tag \
+        gh release create --draft ${{ github.ref_name }} --title ${{ github.ref_name }} --notes-from-tag \
         "RunHideInTray_self-contained_win-x64.zip#RunHideInTray self-contained x64" \
         "RunHideInTray_self-contained_win-arm64.zip#RunHideInTray self-contained ARM64" \
         "RunHideInTray_framework-dependent_win-x64.zip#RunHideInTray framework-dependent x64" \
