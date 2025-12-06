@@ -73,5 +73,15 @@ public sealed partial class CommandLineQuotingTests
             \"
             """,
         };
+
+        yield return new object[]
+        {
+            """
+            "\" a"
+            """,
+            """
+            " a
+            """,
+        };
     }
 }

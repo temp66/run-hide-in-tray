@@ -3,6 +3,36 @@
 public sealed partial class CommandLineQuotingTests
 {
     [TestMethod]
+    [DynamicData(nameof(QuotedFileNameTestData))]
+    public void QuotedFileNameTest(string quoted, string original)
+    {
+        Assert.AreEqual(quoted, CommandLineQuoting.QuotedFileName(original));
+    }
+
+    static IEnumerable<object[]> QuotedFileNameTestData()
+    {
+        yield return new object[]
+        {
+            """
+            "C:\Program Files"
+            """,
+            """
+            C:\Program Files
+            """,
+        };
+
+        yield return new object[]
+        {
+            """
+            ""
+            """,
+            string.Empty,
+        };
+
+        yield return new object[] { "abc", "abc" };
+    }
+
+    [TestMethod]
     [DynamicData(nameof(QuotedFileNameThrowTestData))]
     public void QuotedFileNameThrowTest(string original)
     {
