@@ -67,7 +67,16 @@ After a system tray icon appears, hide or show window through its context menu, 
 
 ## Notes
 
-- On first run, the system tray icon may be hidden by default.
+- On first run,
+  - If you downloaded released executables instead of compiling from source and have some antivirus software on, you will likely encounter an error:
+
+    ```
+    System.ComponentModel.Win32Exception (1223): An error occurred trying to start process ... The operation was canceled by the user.
+    ```
+
+    Manually run RunHideInTrayWinForms.exe once may solve the issue.
+
+  - The system tray icon may be hidden by default.
 
 - The "Hide" menu item is always enabled, because new windows may show up, but the program only tracks which windows are hidden and is unaware of that.
 
