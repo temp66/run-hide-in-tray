@@ -5,8 +5,10 @@
     <TargetFramework>net10.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <InvariantGlobalization>true</InvariantGlobalization>
 
     <AssemblyName>RunHideInTray</AssemblyName>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <UseWindowsForms>true</UseWindowsForms>
     <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
   </PropertyGroup>
