@@ -67,6 +67,8 @@ After a system tray icon appears, hide or show window through its context menu, 
 
 ## Notes
 
+- On first run, the system tray icon may be hidden by default.
+
 - The "Hide" menu item is always enabled, because new windows may show up, but the program only tracks which windows are hidden and is unaware of that.
 
 - The "Show" menu item is enabled iff there are some windows hidden.
