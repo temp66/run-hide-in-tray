@@ -224,8 +224,8 @@ public class ProcessDescendantsMonitor : IDisposable
             }
             using (process)
             {
-                // In case the process has exited and `processId` is recycled in this gap
-                // Process ID cannot be recycled if there is a handle open to the process.
+                // In case the process has exited and `processId` is reused in this gap
+                // Process ID cannot be reused if there is a handle open to the process.
                 if (!PInvoke.IsProcessInJob(process.SafeHandle, _jobObject, out BOOL isProcessInJob))
                     throw Win32Error.CreateExceptionFromLastError(nameof(PInvoke.IsProcessInJob));
                 if (!isProcessInJob)

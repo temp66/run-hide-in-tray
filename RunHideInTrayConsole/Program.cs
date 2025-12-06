@@ -49,7 +49,7 @@ internal class Program
             Description = "The executable to run, and possibly arguments to it.",
             Arity = ArgumentArity.OneOrMore,
         };
-        RootCommand rootCommand = new("Run the executable, and hide the window of it in system tray.")
+        RootCommand rootCommand = new("Run an executable, and hide the window of it in system tray.")
         {
             elevateOption,
             hideOnStartTimeoutOption,
@@ -113,25 +113,26 @@ internal class Program
                     4. The 16-bit Windows system directory ...
                     5. The Windows directory ...
                     6. The directories that are listed in the PATH environment variable. Note that this function does not search the per-application path specified by the App Paths registry key ...
-                  - Current working directory is inherited.
-                  - Environment is inherited if not --elevate.
-                  - Inheritable handles are not inherited.
+                  * Current working directory is inherited.
+                  * Environment is inherited if not --elevate.
+                  * Inheritable handles are not inherited.
 
-                  - Support multiprocess, multi-window applications.
-                  - Do not support Windows Terminal.
+                  * Support multiprocess, multi-window applications.
+                  * Do not support Windows Terminal.
                     Many developers struggle with it. See the main issue: https://github.com/microsoft/terminal/issues/12464.
                     The default terminal application is likely Windows Terminal, and it will not work.
                     To work around, prepend <exec>... with conhost.
-                  - Do not support UWP apps.
-                  - Implemented using Win32 job object, there are some cases where {ApplicationInfo.Name} fails to know what processes are spawned, and fails to function.
+                  * Do not support UWP apps.
+                  * Implemented using Win32 job object, there are some cases where {ApplicationInfo.Name} fails to know what processes are spawned, and fails to function.
                     - Processes are created with Win32_Process.Create. This should be rare.
-                    - <exec>... delegates process creation to some other existing (root) process and immediately exits.
+                    - <exec>... delegates process creation to some other existing process and immediately exits.
                       For instance, File Explorer, Visual Studio Code, and Microsoft Edge.
                   
                   The icon for system tray icon is picked in the following order:
                   1. --icon option.
                   2. The first icon of icons embedded in the first argument of <exec>..., if the argument is an absolute path that contains icon resources.
                   3. A default generic application icon.
+
                 """
             );
 

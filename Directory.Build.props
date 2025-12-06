@@ -2,8 +2,9 @@
   <!-- See https://aka.ms/dotnet/msbuild/customize for more details on customizing your build -->
   <PropertyGroup>
     <UseArtifactsOutput>true</UseArtifactsOutput>
-    <!-- Breaks build
+
     <BaseOutputPath>$(MSBuildThisFileDirectory)\artifacts\bin\</BaseOutputPath>
+    <!-- Will not copy NuGet packages. See https://github.com/dotnet/sdk/issues/23342.
     <UseCommonOutputDirectory>true</UseCommonOutputDirectory>
     -->
   </PropertyGroup>
