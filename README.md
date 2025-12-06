@@ -1,4 +1,4 @@
-# RunHideInTray
+ï»¿# RunHideInTray
 
 A Windows Forms application for Windows 11.
 
@@ -99,11 +99,11 @@ After a system tray icon appears, hide or show window through its context menu, 
 
      ```
      UnblockNeteaseMusic-server
-     ©¦  91001487.ico
-     ©¦  run-RunHideInTray.ps1
-     ©¦  run.ps1
-     ©¦
-     ©¸©¤UnblockNeteaseMusic
+     â”‚  91001487.ico
+     â”‚  run-RunHideInTray.ps1
+     â”‚  run.ps1
+     â”‚
+     â””â”€UnblockNeteaseMusic
           app.js
      ```
 
