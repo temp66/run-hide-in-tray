@@ -116,11 +116,11 @@ After a system tray icon appears, hide or show window through its context menu, 
           app.js
      ```
 
-  2. Clone the repository.
+  2. Clone that repository and setup as instructed. (You may have to install a root certificate.)
 
-     Setup as instructed. You may have to install a root certificate.
+     The following steps take [直接使用 Repo 最新版本](https://github.com/UnblockNeteaseMusic/server/tree/47d6b1d918f8dbf6160b8fa07cd17a9480285005?tab=readme-ov-file#%E7%9B%B4%E6%8E%A5%E4%BD%BF%E7%94%A8-repo-%E6%9C%80%E6%96%B0%E7%89%88%E6%9C%AC) as an example.
 
-  3. Convert the organization avatar to ICO format. (Many online converters are available.)
+  3. Convert the repository owner's avatar to ICO format. (Many online converters are available.)
 
   4. Create `run.ps1`.
 
@@ -134,7 +134,7 @@ After a system tray icon appears, hide or show window through its context menu, 
      
      ```powershell
      cd "D:\UnblockNeteaseMusic-server"
-     & "D:\RunHideInTray\RunHideInTray.exe" --hide-on-start-timeout 0 --title "UnblockNeteaseMusic" --icon 91001487.ico -- conhost pwsh -File run.ps1
+     RunHideInTray --hide-on-start-timeout 0 --title "UnblockNeteaseMusic" --icon 91001487.ico -- conhost pwsh -File run.ps1
      ```
   
   6. Create a shortcut to `run-RunHideInTray.ps1` as you like.
