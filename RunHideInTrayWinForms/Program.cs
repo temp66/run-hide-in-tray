@@ -2,9 +2,8 @@ extern alias RunHideInTrayCommon;
 
 using RunHideInTrayCommon::RunHideInTrayCommon;
 using RunHideInTrayCommon::Windows;
-using RunHideInTrayWinForms.Diagnostics;
-
 using RunHideInTrayCommon::Windows.Win32;
+using RunHideInTrayWinForms.Diagnostics;
 
 using System.ComponentModel;
 using System.Diagnostics;

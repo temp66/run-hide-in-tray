@@ -1,5 +1,4 @@
 ﻿using RunHideInTrayCommon;
-using RunHideInTrayConsole;
 using RunHideInTrayConsole.Diagnostics;
 
 using System.CommandLine;
