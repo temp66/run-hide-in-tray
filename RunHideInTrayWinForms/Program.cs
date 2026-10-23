@@ -24,8 +24,6 @@ internal static class Program
         // see https://aka.ms/applicationconfiguration.
         ApplicationConfiguration.Initialize();
         Application.SetColorMode(SystemColorMode.System);
-
-        // https://stackoverflow.com/questions/7572995/how-can-i-get-winforms-to-stop-silently-ignoring-unhandled-exceptions
         AppDomain.CurrentDomain.UnhandledException += (sender, eventArgs) =>
         {
             ExceptionReporter.ShowMessageBox((Exception)eventArgs.ExceptionObject);
