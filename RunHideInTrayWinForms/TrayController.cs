@@ -44,7 +44,7 @@ internal class TrayController : IDisposable
 
         _contextMenuStrip = new()
         {
-            Font = SystemFonts.IconTitleFont,
+            Font = SystemFonts.MenuFont,
             AllowTransparency = true,
         };
         SystemEvents.UserPreferenceChanged += OnUserPreferenceChanged;
@@ -222,6 +222,6 @@ internal class TrayController : IDisposable
     void OnUserPreferenceChanged(object? sender, UserPreferenceChangedEventArgs eventArgs)
     {
         if (eventArgs.Category == UserPreferenceCategory.Window)
-            _contextMenuStrip.Font = SystemFonts.IconTitleFont;
+            _contextMenuStrip.Font = SystemFonts.MenuFont;
     }
 }
