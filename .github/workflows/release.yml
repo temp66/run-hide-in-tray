@@ -46,13 +46,11 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v6.0.1
-      with:
-        fetch-depth: 1
+      uses: actions/checkout@v7
 
     # Install the .NET Core workload
     - name: Install .NET Core
-      uses: actions/setup-dotnet@v5.0.1
+      uses: actions/setup-dotnet@v6
       with:
         dotnet-version: 10.0
         dotnet-quality: ga
@@ -68,10 +66,11 @@ jobs:
         Compress-Archive publish\release -DestinationPath RunHideInTray_${{ matrix.self-contained.pivot }}_${{ matrix.RID }}.zip
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@v5.0.0
+      uses: actions/upload-artifact@v7
       with:
         name: RunHideInTray_${{ matrix.self-contained.pivot }}_${{ matrix.RID }}
         path: artifacts\RunHideInTray_${{ matrix.self-contained.pivot }}_${{ matrix.RID }}.zip
+        archive: false
   
   release:
 
@@ -84,13 +83,12 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v6.0.1
-      with:
-        fetch-depth: 1
+      uses: actions/checkout@v7
 
     - name: Download artifacts
-      uses: actions/download-artifact@v6.0.0
+      uses: actions/download-artifact@v8
       with:
+        skip-decompress: true
         merge-multiple: true
 
     - name: Create Github Release
