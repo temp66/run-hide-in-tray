@@ -1,7 +1,7 @@
 extern alias RunHideInTrayCommon;
 
 using RunHideInTrayCommon::RunHideInTrayCommon;
-using RunHideInTrayCommon::Windows;
+using RunHideInTrayCommon::RunHideInTrayCommon.Windows;
 using RunHideInTrayWinForms.Diagnostics;
 
 using System.IO.Pipes;

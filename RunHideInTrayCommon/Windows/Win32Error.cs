@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Runtime.InteropServices;
 
-namespace Windows;
+namespace RunHideInTrayCommon.Windows;
 
 internal static class Win32Error
 {

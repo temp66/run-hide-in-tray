@@ -10,7 +10,7 @@ using Windows.Win32.Foundation;
 using Windows.Win32.System.JobObjects;
 using Windows.Win32.System.Threading;
 
-namespace Windows;
+namespace RunHideInTrayCommon.Windows;
 
 public class ProcessDescendantsMonitor : IDisposable
 {
