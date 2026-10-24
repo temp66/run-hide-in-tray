@@ -86,7 +86,7 @@ internal static class Program
         // `Task.Dispose` may throw.
         /* using Task waitForAllProcesses */ _ = processDescendantsMonitor.WaitForAllProcessesAsync(synchronizingObject);
 
-        using TrayController trayController = new(config, processDescendantsMonitor);
+        using TrayController trayController = new(config, synchronizingObject, processDescendantsMonitor);
         Application.Run();
         return exitCode!.Value;
     }

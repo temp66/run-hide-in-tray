@@ -20,6 +20,7 @@ internal class TrayController : IDisposable
 
     NotifyIcon _notifyIcon;
     ContextMenuStrip _contextMenuStrip;
+    ISynchronizeInvoke _synchronizingObject;
     ToolStripMenuItem _hideMenuItem;
     ToolStripMenuItem _showMenuItem;
     ToolStripSeparator _toolStripSeparator = new();
@@ -30,7 +31,7 @@ internal class TrayController : IDisposable
 
     bool _disposed = false;
 
-    public TrayController(Config config, ProcessDescendantsMonitor processDescendantsMonitor)
+    public TrayController(Config config, ISynchronizeInvoke synchronizingObject, ProcessDescendantsMonitor processDescendantsMonitor)
     {
         _hideMenuItem = new("Hide", null, (sender, eventArgs) => HideWindows());
 
@@ -47,6 +48,7 @@ internal class TrayController : IDisposable
             Font = SystemFonts.MenuFont,
             AllowTransparency = true,
         };
+        _synchronizingObject = synchronizingObject;
         SystemEvents.UserPreferenceChanged += OnUserPreferenceChanged;
         _contextMenuStrip.Items.AddRange(_hideMenuItem, _showMenuItem, _toolStripSeparator, _exitMenuItem);
 
@@ -67,6 +69,12 @@ internal class TrayController : IDisposable
 
         if (config.HideOnStartTimeout >= 0)
             HideWindows(config.HideOnStartTimeout);
+    }
+
+    void OnUserPreferenceChanged(object? sender, UserPreferenceChangedEventArgs eventArgs)
+    {
+        if (eventArgs.Category == UserPreferenceCategory.Window)
+            _ = _synchronizingObject.BeginInvoke(() => _contextMenuStrip.Font = SystemFonts.MenuFont, []);
     }
 
     public void Dispose()
@@ -217,11 +225,5 @@ internal class TrayController : IDisposable
                 PInvoke.SetForegroundWindow(hiddenWindowHandle);
         }
         _hiddenWindowHandleList.Clear();
-    }
-
-    void OnUserPreferenceChanged(object? sender, UserPreferenceChangedEventArgs eventArgs)
-    {
-        if (eventArgs.Category == UserPreferenceCategory.Window)
-            _contextMenuStrip.Font = SystemFonts.MenuFont;
     }
 }
