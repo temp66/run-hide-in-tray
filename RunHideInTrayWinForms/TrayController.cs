@@ -5,13 +5,12 @@ using RunHideInTrayCommon::String;
 using RunHideInTrayCommon::Windows;
 using RunHideInTrayWinForms.Diagnostics;
 
-using Windows.Win32;
-using Windows.Win32.Foundation;
-using Windows.Win32.UI.WindowsAndMessaging;
-
 using Microsoft.Win32;
 using System.ComponentModel;
 using System.Diagnostics;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.UI.WindowsAndMessaging;
 
 namespace RunHideInTrayWinForms;
 
