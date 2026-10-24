@@ -2,11 +2,8 @@ extern alias RunHideInTrayCommon;
 
 using RunHideInTrayCommon::RunHideInTrayCommon;
 using RunHideInTrayCommon::Windows;
-using RunHideInTrayCommon::Windows.Win32;
 using RunHideInTrayWinForms.Diagnostics;
 
-using System.ComponentModel;
-using System.Diagnostics;
 using System.IO.Pipes;
 using System.Text.Json;
 
@@ -67,59 +64,30 @@ internal static class Program
 
     static int Main_(Config config)
     {
-        ProcessDescendantsMonitor processDescendantsMonitor;
-        try
+        using ProcessDescendantsMonitor processDescendantsMonitor = new(config.Exec);
+        int? exitCode = null;
+        processDescendantsMonitor.AllExited += (sender, eventArgs) =>
         {
-            processDescendantsMonitor = new(config.Exec);
-        }
-        catch (Win32Exception ex)
+            Application.Exit();
+            exitCode = ((ProcessDescendantsMonitor)sender!).GetRootProcessExitCode();
+        };
+        processDescendantsMonitor.Faulted += (sender, eventArgs) =>
         {
-            ExceptionReporter.ShowMessageBox(ex);
-            return (int)(ex.Data["FunctionName"] switch
-            {
-                nameof(PInvoke.CreateJobObject) => ExitCode.ErrorCreateJobObject,
-                nameof(PInvoke.CreateIoCompletionPort) => ExitCode.ErrorCreateIoCompletionPort,
-                nameof(PInvoke.SetInformationJobObject) => ExitCode.ErrorSetInformationJobObject,
-                nameof(PInvoke.CreateProcess) => ExitCode.ErrorCreateProcess,
-                nameof(PInvoke.AssignProcessToJobObject) => ExitCode.ErrorAssignProcessToJobObject,
-                nameof(PInvoke.ResumeThread) => ExitCode.ErrorResumeThread,
-                _ => throw new UnreachableException(),
-            });
-        }
-        using (processDescendantsMonitor)
-        {
-            int? exitCode = null;
-            processDescendantsMonitor.AllExited += (sender, eventArgs) =>
-            {
-                Application.Exit();
-                try
-                {
-                    exitCode = ((ProcessDescendantsMonitor)sender!).GetRootProcessExitCode();
-                }
-                catch (Win32Exception ex)
-                {
-                    ExceptionReporter.ShowMessageBox(ex);
-                    exitCode = (int)ExitCode.ErrorGetExitCodeProcess;
-                }
-            };
-            processDescendantsMonitor.Faulted += (sender, eventArgs) =>
-            {
-                ExceptionReporter.ShowMessageBox(eventArgs);
-                Application.Exit();
-                exitCode = (int)ExitCode.ErrorGetQueuedCompletionStatus;
-            };
-            // Do not run message loops betweeen `ProcessDescendantsMonitor.WaitForAllProcessesAsync` and `Application.Run`.
-            // Pitfall: `MessageBox.Show` runs a message loop.
-            using Control synchronizingObject = new();
-            // https://learn.microsoft.com/en-us/dotnet/api/system.windows.forms.control.invokerequired?view=windowsdesktop-10.0#remarks
-            _ = synchronizingObject.Handle;
-            // https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task.dispose?view=net-10.0#system-threading-tasks-task-dispose
-            // `Task.Dispose` may throw.
-            /* using Task waitForAllProcesses */ _ = processDescendantsMonitor.WaitForAllProcessesAsync(synchronizingObject);
+            ExceptionReporter.ShowMessageBox(eventArgs);
+            Application.Exit();
+            exitCode = (int)ExitCode.ErrorGetQueuedCompletionStatus;
+        };
+        // Do not run message loops betweeen `ProcessDescendantsMonitor.WaitForAllProcessesAsync` and `Application.Run`.
+        // Pitfall: `MessageBox.Show` runs a message loop.
+        using Control synchronizingObject = new();
+        // https://learn.microsoft.com/en-us/dotnet/api/system.windows.forms.control.invokerequired?view=windowsdesktop-10.0#remarks
+        _ = synchronizingObject.Handle;
+        // https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task.dispose?view=net-10.0#system-threading-tasks-task-dispose
+        // `Task.Dispose` may throw.
+        /* using Task waitForAllProcesses */ _ = processDescendantsMonitor.WaitForAllProcessesAsync(synchronizingObject);
 
-            using TrayController trayController = new(config, processDescendantsMonitor);
-            Application.Run();
-            return exitCode!.Value;
-        }
+        using TrayController trayController = new(config, processDescendantsMonitor);
+        Application.Run();
+        return exitCode!.Value;
     }
 }

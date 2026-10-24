@@ -8,7 +8,6 @@ internal static class Win32Error
     public static Win32Exception CreateExceptionFromError(string functionName, int error)
     {
         Win32Exception ex = new(error, $"{functionName}: {Marshal.GetPInvokeErrorMessage(error)}");
-        ex.Data["FunctionName"] = functionName;
         return ex;
     }
 
